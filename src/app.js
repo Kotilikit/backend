@@ -13,6 +13,8 @@ const server = http.createServer((request, response) => {
     response.header = "Content-Type: text";
     response.write(`hello, ${helloValue}`);
     response.end();
+
+    return;
   }
 
   if (request.url === "/users") {
@@ -28,7 +30,7 @@ const server = http.createServer((request, response) => {
   if (request.url === "/?hello") {
     response.statusCode = 400;
     response.statusMessage = "Bad Request";
-    response.header("Content-Type: text");
+    response.setHeader("Content-Type", "text");
     response.write("Enter a name");
     response.end();
     return;
@@ -40,6 +42,7 @@ const server = http.createServer((request, response) => {
     response.header = "Content-Type: text";
     response.write("Hello, world!");
     response.end();
+
     return;
   }
 
@@ -48,6 +51,8 @@ const server = http.createServer((request, response) => {
   response.header = "Content-Type: text";
   response.write(" ");
   response.end();
+
+  return;
 });
 
 server.listen(3003, () => {
