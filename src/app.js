@@ -1,60 +1,38 @@
-const http = require("http");
-const getUsers = require("./modules/users");
-const { URL } = require("url");
+const express = require("express");
+const dotenv = require("dotenv");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const userRouter = require("./routes/users");
+const bookRouter = require("./routes/books");
+const loggerOne = require("./middleware/loggerOne");
 
-const server = http.createServer((request, response) => {
-  const ipAddress = "http://127.0.0.1";
-  const url = new URL(request.url, ipAddress);
-  const helloValue = url.searchParams.get("hello");
+dotenv.config();
 
-  if (helloValue) {
-    response.status = 200;
-    response.statusMessage = "Ok";
-    response.header = "Content-Type: text";
-    response.write(`hello, ${helloValue}`);
-    response.end();
+const {
+  PORT = 3005,
+  API_URL = "http://127.0.0.1",
+  MONGO_URL = "mongodb://localhost:27017/mydb",
+} = process.env;
 
-    return;
-  }
+mongoose.connect(MONGO_URL).catch((error) => console.log(error));
 
-  if (request.url === "/users") {
-    response.status = 200;
-    response.statusMessage = "Ok";
-    response.header = "Content-Type: aplication/json";
-    response.write(getUsers());
-    response.end();
+const app = express();
 
-    return;
-  }
+const helloWorld = (request, response) => {
+  response.status(200);
+  response.send("Hello, World!");
+};
 
-  if (request.url === "/?hello") {
-    response.statusCode = 400;
-    response.statusMessage = "Bad Request";
-    response.setHeader("Content-Type", "text");
-    response.write("Enter a name");
-    response.end();
-    return;
-  }
+app.use(cors());
+app.use(loggerOne);
+app.use(bodyParser.json());
 
-  if (request.url === "/") {
-    response.status = 200;
-    response.statusMessage = "Ok";
-    response.header = "Content-Type: text";
-    response.write("Hello, world!");
-    response.end();
+app.get("/", helloWorld);
 
-    return;
-  }
+app.use(userRouter);
+app.use(bookRouter);
 
-  response.status = 500;
-  response.statusMessage = "Ok";
-  response.header = "Content-Type: text";
-  response.write(" ");
-  response.end();
-
-  return;
-});
-
-server.listen(3003, () => {
-  console.log("Сервер запущен по адресу http://127.0.0.1:3003");
+app.listen(PORT, () => {
+  console.log(`Сервер запущен по адресу ${API_URL}:${PORT}`);
 });
